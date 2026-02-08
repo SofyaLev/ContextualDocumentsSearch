@@ -1,0 +1,10 @@
+flet
+
+chromadb
+
+sentence-transformers
+
+pypdf
+python-docx
+
+pytest
