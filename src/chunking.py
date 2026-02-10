@@ -1,6 +1,3 @@
-text = open('documents\catcaterpillar.txt', encoding = 'UTF8').readlines()
-text = ''.join(text)
-print(text)
 import re
 
 def chunk_text_by_sentence(text: str, n: int):
@@ -22,9 +19,3 @@ def chunk_text_by_sentence(text: str, n: int):
         chunks.append(current_chunk.strip())
         
     return chunks
-
-N = 400
-chunks = chunk_text_by_sentence(text, N)
-
-for i, chunk in enumerate(chunks):
-    print(f"Чанк {i+1} (Длина {len(chunk)}): '{chunk}'")
