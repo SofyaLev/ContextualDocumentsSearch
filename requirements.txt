@@ -3,5 +3,5 @@ docx2txt == 0.9
 chromadb == 1.5.0
 # sentence-transformers == 5.2.2 - векторизация есть в chromadb
 PyPDF2 == 3.0.1
-# pytest
+pytest==9.0.2
 nltk == 3.9.2
