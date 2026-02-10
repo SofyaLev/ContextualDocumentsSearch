@@ -2,22 +2,23 @@ from pathlib import Path
 import re
 import chromadb
 import os
-from find_best_function import find_best_chunk
 from text_extration import TextExtraction
-from chunking import chunk_text_by_sentence
-import nltk
+from chunk_processing import find_best_chunk, chunk_text_by_sentence
 
-nltk.download('punkt_tab')
-nltk.download('wordnet')
+# import nltk
+# nltk.download('punkt_tab')
+# nltk.download('wordnet')
+
 
 class RelevantDocumentsSearch:
-    def __init__(self, current_folder_path, request, chunk_length=400):
+    def __init__(self, current_folder_path, request, chunk_length=400, results_count=5):
         self.app_data_path = os.path.join(os.environ.get('LOCALAPPDATA', 'C:\\Temp'), 'ChromaDBDocStorage')
         os.makedirs(self.app_data_path, exist_ok=True)
         self.client = chromadb.PersistentClient(path=self.app_data_path)
         self.request = request
         self.current_folder_path = current_folder_path
         self.chunk_length = chunk_length
+        self.results_count = results_count
 
 
     def create_collection(self, text_chunks, relative_path):
@@ -36,7 +37,7 @@ class RelevantDocumentsSearch:
         return collection
 
 
-    def find_documents(self) -> dict:
+    def find_documents(self) -> list:
         documents_dict = TextExtraction(self.current_folder_path).extract()  # {'path': 'text', ...}
         distances = {}
         for path in documents_dict:
@@ -45,11 +46,11 @@ class RelevantDocumentsSearch:
             collection = self.create_collection(chunks, path)
             best_chunk, best_distance = find_best_chunk(collection, self.request)
             distances[path] = best_distance
-        return distances
-    
-    def extract_rel_doc_paths(distances):
-        number_of_docs = 5
-        sorted_d = dict(sorted(distances.items(), key=lambda x: x[1])[:number_of_docs])
+        return self.extract_rel_doc_paths(distances)
+
+
+    def extract_rel_doc_paths(self, distances: dict) -> list:
+        sorted_d = dict(sorted(distances.items(), key=lambda x: x[1])[:self.results_count])
         relevant_paths = []
         for key in sorted_d:
             relevant_paths.append(key)
@@ -59,6 +60,5 @@ class RelevantDocumentsSearch:
 main_folder_name = 'documents'  # название корневого каталога
 main_folder = Path.joinpath(Path(__file__).parent.parent, main_folder_name)  # полный путь до корневого каталога
 
-d = RelevantDocumentsSearch(main_folder, 'я повесил пиджак на стул').find_documents()
-sorted_d = RelevantDocumentsSearch.extract_rel_doc_paths(d)
-print(sorted_d)
+d = RelevantDocumentsSearch(main_folder, 'друг').find_documents()
+print(d)
