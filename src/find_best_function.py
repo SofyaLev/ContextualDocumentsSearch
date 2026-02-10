@@ -1,4 +1,7 @@
+from text_extration import TextExtraction
+
 def find_best_chunk(collection, request):
+    request = TextExtraction.lemmatization_and_punct_clean(request)
     results = collection.query(
         query_texts=[f'{request}'],
         n_results=1

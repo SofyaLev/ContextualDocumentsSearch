@@ -30,8 +30,9 @@ class TextExtraction:
                 self.full_paths.append(path)
 
     @staticmethod
-    def lemmatization(text):
-        """ Лемматизация текста - удаление окончаний для повышения эффективности обработки """
+    def lemmatization_and_punct_clean(text):
+        """ Функция для лемматизации текста и удаления знаков препинания. 
+        Лемматизация текста - удаление окончаний для повышения эффективности обработки"""
         en_lemmatizer = WordNetLemmatizer()
         ru_stemmer = SnowballStemmer("russian")
         lemmatized_words = []
@@ -41,11 +42,13 @@ class TextExtraction:
                 lemmatized_words.append(ru_stemmer.stem(token))
             else:
                 lemmatized_words.append(en_lemmatizer.lemmatize(token))
-        return ' '.join(lemmatized_words)
+        lemmed = ' '.join(lemmatized_words)
+        text = re.sub(r'[^\w\s]', '', lemmed)
+        return text
 
 
     def read_text_from_file(self, path: Path):
-        """ Функция для извлечения текста из файлов разного расширения """
+        """ Функция для извлечения текста из файлов разного расширения"""
         extension = path.suffix
         relative_path = path.relative_to(self.main_folder_path)
         file_text = ""
