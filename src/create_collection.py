@@ -46,11 +46,19 @@ class RelevantDocumentsSearch:
             best_chunk, best_distance = find_best_chunk(collection, self.request)
             distances[path] = best_distance
         return distances
+    
+    def extract_rel_doc_paths(distances):
+        number_of_docs = 5
+        sorted_d = dict(sorted(distances.items(), key=lambda x: x[1])[:number_of_docs])
+        relevant_paths = []
+        for key in sorted_d:
+            relevant_paths.append(key)
+        return relevant_paths
 
 
 main_folder_name = 'documents'  # название корневого каталога
 main_folder = Path.joinpath(Path(__file__).parent.parent, main_folder_name)  # полный путь до корневого каталога
 
 d = RelevantDocumentsSearch(main_folder, 'я повесил пиджак на стул').find_documents()
-sorted_d = dict(sorted(d.items(), key=lambda x: x[1]))
+sorted_d = RelevantDocumentsSearch.extract_rel_doc_paths(d)
 print(sorted_d)
