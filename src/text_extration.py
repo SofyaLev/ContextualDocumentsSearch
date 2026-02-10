@@ -5,8 +5,7 @@ from nltk import word_tokenize, SnowballStemmer
 from nltk.stem import WordNetLemmatizer
 import re
 
-main_folder_name = 'documents'  # название корневого каталога
-main_folder = Path.joinpath(Path(__file__).parent.parent, main_folder_name)  # полный путь до корневого каталога
+
 
 
 class TextExtraction:
@@ -59,7 +58,7 @@ class TextExtraction:
                     file_text += page.extract_text()
         else:
             pass
-        self.texts[relative_path] = self.lemmatization(file_text)
+        self.texts[relative_path] = file_text
 
 
     def extract_texts(self) -> dict:
@@ -68,6 +67,6 @@ class TextExtraction:
         return self.texts
 
 
-Texts = TextExtraction(main_folder).texts
-for i in Texts:
-    print(i, Texts[i][:10])
+# Texts = TextExtraction(main_folder).texts
+# for i in Texts:
+#     print(i, Texts[i][:10])
