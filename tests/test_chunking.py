@@ -1,4 +1,4 @@
-from src.chunking import chunk_text_by_sentence
+from src.chunk_processing import chunk_text_by_sentence
 
 def test_chunk_text_basic():
     text = "Hello world. This is a test. Another sentence."
