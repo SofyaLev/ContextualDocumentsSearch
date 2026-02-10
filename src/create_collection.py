@@ -23,9 +23,7 @@ def create_collection(text_chunks, relative_path):
 
 
 def create_documents_collections(current_folder):
-    obj = TextExtraction(current_folder)
-    documents_dict = obj.texts  # {'path': 'text', ...}
-    print(obj.full_paths)
+    documents_dict = TextExtraction(current_folder).extract() # {'path': 'text', ...}
     distances = {}
     for path in documents_dict:
         text = documents_dict[path]

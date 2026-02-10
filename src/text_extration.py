@@ -6,8 +6,6 @@ from nltk.stem import WordNetLemmatizer
 import re
 
 
-
-
 class TextExtraction:
 
     def __init__(self, main_folder_path):
@@ -15,19 +13,25 @@ class TextExtraction:
         self.full_paths = []
         self.texts = {}
 
-        self.get_full_path(self.main_folder_path)
 
-    def get_full_path(self, folder_path):
+    def extract(self) -> dict:
+        self.get_paths(self.main_folder_path)
+        for path in self.full_paths:
+            self.read_text_from_file(path)
+        return self.texts.copy()
+
+
+    def get_paths(self, folder_path) -> None:
         """ Функция для поиска путей всех файлов """
         for path in Path.iterdir(folder_path):
             if Path.is_dir(path):
-                return self.get_full_path(path)
+                self.get_paths(path)
             else:
                 self.full_paths.append(path)
-        return self.extract_texts()
 
     @staticmethod
     def lemmatization(text):
+        """ Лемматизация текста - удаление окончаний для повышения эффективности обработки """
         en_lemmatizer = WordNetLemmatizer()
         ru_stemmer = SnowballStemmer("russian")
         lemmatized_words = []
@@ -41,6 +45,7 @@ class TextExtraction:
 
 
     def read_text_from_file(self, path: Path):
+        """ Функция для извлечения текста из файлов разного расширения """
         extension = path.suffix
         relative_path = path.relative_to(self.main_folder_path)
         file_text = ""
@@ -59,14 +64,3 @@ class TextExtraction:
         else:
             pass
         self.texts[relative_path] = file_text
-
-
-    def extract_texts(self) -> dict:
-        for path in self.full_paths:
-            self.read_text_from_file(path)
-        return self.texts
-
-
-# Texts = TextExtraction(main_folder).texts
-# for i in Texts:
-#     print(i, Texts[i][:10])
