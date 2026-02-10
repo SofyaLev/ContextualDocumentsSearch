@@ -1,10 +1,7 @@
-flet
-
-chromadb
-
-sentence-transformers
-
-pypdf
-python-docx
-
-pytest
+flet == 0.80.5
+docx2txt == 0.9
+chromadb == 1.5.0
+# sentence-transformers == 5.2.2 - векторизация есть в chromadb
+PyPDF2 == 3.0.1
+# pytest
+nltk == 3.9.2

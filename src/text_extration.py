@@ -9,7 +9,7 @@ main_folder_name = 'documents'  # название корневого катал
 main_folder = Path.joinpath(Path(__file__).parent.parent, main_folder_name)  # полный путь до корневого каталога
 
 
-class TextCollecting:
+class TextExtraction:
 
     def __init__(self, main_folder_path):
         self.main_folder_path = main_folder_path
@@ -25,10 +25,10 @@ class TextCollecting:
                 return self.get_full_path(path)
             else:
                 self.full_paths.append(path)
-        return self.collect_texts()
+        return self.extract_texts()
 
-    def clean_and_lem(self, text):
-        # text = ' '.join(clean(text, punct=True).split())  можно использовать методы строк
+    @staticmethod
+    def lemmatization(text):
         en_lemmatizer = WordNetLemmatizer()
         ru_stemmer = SnowballStemmer("russian")
         lemmatized_words = []
@@ -59,13 +59,15 @@ class TextCollecting:
                     file_text += page.extract_text()
         else:
             pass
+        self.texts[relative_path] = self.lemmatization(file_text)
 
-        self.texts[relative_path] = self.clean_and_lem(file_text)
 
-    def collect_texts(self):
+    def extract_texts(self) -> dict:
         for path in self.full_paths:
             self.read_text_from_file(path)
         return self.texts
 
-new_obj = TextCollecting(main_folder)
-print(new_obj.texts)
+
+Texts = TextExtraction(main_folder).texts
+for i in Texts:
+    print(i, Texts[i][:10])
