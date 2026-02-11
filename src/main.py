@@ -14,6 +14,9 @@ def main(page: flet.Page):
     page.window_width = page.width
     page.window_height = page.height
 
+    # переменная для хранения пути
+    current_directory = None
+
     def show_message(text, color=flet.Colors.BLUE_400):
         """Отобразить всплывающее уведомление пользователю.
         Используется для информирования об ошибках или действиях.
@@ -22,15 +25,34 @@ def main(page: flet.Page):
         color (flet.Colors): Цвет фона уведомления.
         """
 
-        # В новых версиях Flet это самый надежный способ:
         snack = flet.SnackBar(
             content=flet.Text(text),
             bgcolor=color,
-            action="OK"  # Добавим кнопку, чтобы уведомление не исчезало само сразу
+            action="OK"
         )
         page.overlay.append(snack)
         snack.open = True
         page.update()
+
+    def get_database_results(query, folder_path):
+        """Заглушка для подключения базы данных.
+        Вставить вызов методов ChromaDB или поиск по файлам.
+
+        query (str): поисковый запрос.
+        folder_path (str): путь к папке для поиска.
+        """
+
+
+        if not folder_path:
+            return []
+
+        # Здесь логика: если в базе есть query, вернуть список путей
+        if "cat" in query.lower():
+            return [
+                os.path.join(folder_path, "cats.txt"),
+                os.path.join(folder_path, "catcaterpillar.pdf")
+            ]
+        return []
 
     def handle_folder_result(e: flet.FilePickerResultEvent):
         """Обработать результат выбора директории пользователем.
@@ -38,8 +60,9 @@ def main(page: flet.Page):
 
         e (flet.FilePickerResultEvent): Объект события с путем к папке.
         """
-
+        nonlocal current_directory
         if e.path:
+            current_directory = e.path
             selected_path_label.value = f"Selected: {e.path}"
             show_message(f"Directory selected: {os.path.basename(e.path)}")
 
@@ -96,17 +119,19 @@ def main(page: flet.Page):
             show_message("Please enter a search term", color=flet.Colors.RED_400)
             return
 
+        if not current_directory:
+            show_message("Please select a folder first", color=flet.Colors.ORANGE_700)
+            return
+
         loader.visible = True
         page.update()
 
-        # имитация получения данных - сделать вызов бекенда
-        mock_results = [
-            "C:/mock_data/cats.txt",
-            "C:/mock_data/catcaterpillar.pdf",
-        ] if "cat" in search_field.value else []
+        # заглушка для получения данных от БД
+        search_query = search_field.value
+        db_results = get_database_results(search_query, current_directory)
 
         loader.visible = False
-        update_results(mock_results)
+        update_results(db_results)
 
     layout, search_field, results_area, selected_path_label, loader = create_main_layout(page, handle_search, handle_folder_result, handle_clear)
 
