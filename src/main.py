@@ -14,6 +14,24 @@ def main(page: flet.Page):
     page.window_width = page.width
     page.window_height = page.height
 
+    def show_message(text, color=flet.Colors.BLUE_400):
+        """Отобразить всплывающее уведомление пользователю.
+        Используется для информирования об ошибках или действиях.
+
+        text (str): Текст сообщения.
+        color (flet.Colors): Цвет фона уведомления.
+        """
+
+        # В новых версиях Flet это самый надежный способ:
+        snack = flet.SnackBar(
+            content=flet.Text(text),
+            bgcolor=color,
+            action="OK"  # Добавим кнопку, чтобы уведомление не исчезало само сразу
+        )
+        page.overlay.append(snack)
+        snack.open = True
+        page.update()
+
     def handle_folder_result(e: flet.FilePickerResultEvent):
         """Обработать результат выбора директории пользователем.
         Обновляет текстовую метку на главном экране при успешном выборе.
@@ -23,8 +41,16 @@ def main(page: flet.Page):
 
         if e.path:
             selected_path_label.value = f"Selected: {e.path}"
-            print(f"Directory selected: {e.path}")
-            page.update()
+            show_message(f"Directory selected: {os.path.basename(e.path)}")
+
+    def handle_clear(e):
+        """Очистить область результатов и поле поиска.
+        Сбрасывает визуальное состояние списка найденных фрагментов.
+        """
+
+        results_area.controls.clear()
+        search_field.value = ""
+        show_message("Results cleared", color=flet.Colors.GREY_700)
 
     def update_results(file_paths):
         """Отобразить найденные файлы в списке в заданном порядке.
@@ -39,6 +65,7 @@ def main(page: flet.Page):
         results_area.controls.clear()
 
         if not file_paths:
+            show_message("No matches found", color=flet.Colors.ORANGE_700)
             results_area.controls.append(flet.Text("No files found", color=flet.Colors.RED_400))
         else:
             for path in file_paths:
@@ -50,7 +77,7 @@ def main(page: flet.Page):
                                 leading=flet.Icon(flet.Icons.INSERT_DRIVE_FILE, color=flet.Colors.BLUE_400),
                                 title=flet.Text(file_name, weight=flet.FontWeight.BOLD),
                                 subtitle=flet.Text(path, size=12),
-                                on_click=lambda _, p=path: print(f"Selected file: {p}")
+                                on_click=lambda _, p=path: show_message(f"Opening {os.path.basename(p)}...")
                             ),
                             padding=5
                         )
@@ -65,22 +92,23 @@ def main(page: flet.Page):
         e (any): Событие нажатия кнопки или клавиши Enter.
         """
 
-        if search_field.value:
-            loader.visible = True
-            results_area.controls.clear()
-            page.update()
+        if not search_field.value:
+            show_message("Please enter a search term", color=flet.Colors.RED_400)
+            return
 
-            # имитация получения данных - сделать вызов бекенда
-            mock_results = [
-                "C:/mock_data/cats.txt",
-                "C:/mock_data/dogs.docx",
-                "C:/mock_data/catcaterpillar.pdf",
-            ]
+        loader.visible = True
+        page.update()
 
-            loader.visible = False
-            update_results(mock_results)
+        # имитация получения данных - сделать вызов бекенда
+        mock_results = [
+            "C:/mock_data/cats.txt",
+            "C:/mock_data/catcaterpillar.pdf",
+        ] if "cat" in search_field.value else []
 
-    layout, search_field, results_area, selected_path_label, loader = create_main_layout(page, handle_search, handle_folder_result)
+        loader.visible = False
+        update_results(mock_results)
+
+    layout, search_field, results_area, selected_path_label, loader = create_main_layout(page, handle_search, handle_folder_result, handle_clear)
 
     page.add(layout)
 
