@@ -1,4 +1,4 @@
-from text_extration import TextExtraction
+from src.text_extration import TextExtraction
 import re
 
 
