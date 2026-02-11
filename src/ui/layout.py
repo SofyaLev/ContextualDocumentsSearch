@@ -1,6 +1,6 @@
 import flet
 
-def create_main_layout(page: flet.Page, on_search_click, on_folder_result):
+def create_main_layout(page: flet.Page, on_search_click, on_folder_result, on_clear_click):
     """Создать базовый шаблон интерфейса приложения.
     Функция инициализирует основные визуальные компоненты, включая поле поиска,
     список результатов и индикатор загрузки.
@@ -8,6 +8,7 @@ def create_main_layout(page: flet.Page, on_search_click, on_folder_result):
     page (flet.Page): Объект страницы приложения для регистрации overlay.
     on_search_click (function): Обработчик события запуска поиска.
     on_folder_result (function): Обработчик события выбора папки.
+    on_clear_click (function): Обработчик для очистки списка результатов.
     """
 
     directory_picker = flet.FilePicker(on_result=on_folder_result)
@@ -46,7 +47,12 @@ def create_main_layout(page: flet.Page, on_search_click, on_folder_result):
             flet.Row(
                 [
                     search_input,
-                    flet.IconButton(icon=flet.Icons.SEARCH, on_click=on_search_click)
+                    flet.IconButton(icon=flet.Icons.SEARCH, on_click=on_search_click),
+                    flet.IconButton(
+                        icon=flet.Icons.DELETE_OUTLINED,
+                        on_click=on_clear_click,
+                        tooltip="Clear search results"
+                    )
                 ]
             ),
             loader,
