@@ -1,7 +1,9 @@
-from src.chunk_processing import chunk_text_by_sentence
+from src.chunk_processing import chunk_text_by_sentence, find_best_chunk
+from unittest.mock import Mock, patch
 
 
 class TestChunkTextBySentence:
+
     def test_chunk_text_basic(self):
         text = "Hello world. This is a test. Another sentence."
         result = chunk_text_by_sentence(text, 20)
@@ -64,3 +66,94 @@ class TestChunkTextBySentence:
         result = chunk_text_by_sentence(text, 10)
         assert len(result) > 0
         assert any("Dr. Smith is here." in chunk for chunk in result)
+
+
+class TestFindBestChunk:
+
+    def test_find_best_chunk_basic(self):
+        mock_collection = Mock()
+        mock_collection.query.return_value = {
+            'distances': [[0.5]],
+            'documents': [['This is the best chunk']]
+        }
+        
+        with patch('src.chunk_processing.TextExtraction.lemmatization_and_punct_clean', return_value='test query'):
+            chunk, distance = find_best_chunk(mock_collection, 'test query')
+        
+        assert chunk == 'This is the best chunk'
+        assert distance == 0.5
+
+    def test_find_best_chunk_calls_query_once(self):
+        mock_collection = Mock()
+        mock_collection.query.return_value = {
+            'distances': [[0.1]],
+            'documents': [['chunk']]
+        }
+        
+        with patch('src.chunk_processing.TextExtraction.lemmatization_and_punct_clean', return_value='request'):
+            find_best_chunk(mock_collection, 'request')
+        
+        mock_collection.query.assert_called_once_with(query_texts=['request'], n_results=1)
+
+    def test_find_best_chunk_zero_distance(self):
+        mock_collection = Mock()
+        mock_collection.query.return_value = {
+            'distances': [[0.0]],
+            'documents': [['Perfect match']]
+        }
+        
+        with patch('src.chunk_processing.TextExtraction.lemmatization_and_punct_clean', return_value='perfect'):
+            chunk, distance = find_best_chunk(mock_collection, 'perfect')
+        
+        assert distance == 0.0
+        assert chunk == 'Perfect match'
+
+    def test_find_best_chunk_high_distance(self):
+        mock_collection = Mock()
+        mock_collection.query.return_value = {
+            'distances': [[0.95]],
+            'documents': [['Poor match']]
+        }
+        
+        with patch('src.chunk_processing.TextExtraction.lemmatization_and_punct_clean', return_value='query'):
+            chunk, distance = find_best_chunk(mock_collection, 'query')
+        
+        assert distance == 0.95
+
+    def test_find_best_chunk_returns_tuple(self):
+        mock_collection = Mock()
+        mock_collection.query.return_value = {
+            'distances': [[0.3]],
+            'documents': [['Some text']]
+        }
+        
+        with patch('src.chunk_processing.TextExtraction.lemmatization_and_punct_clean', return_value='text'):
+            result = find_best_chunk(mock_collection, 'text')
+        
+        assert isinstance(result, tuple)
+        assert len(result) == 2
+
+    def test_find_best_chunk_lemmatization_called(self):
+        mock_collection = Mock()
+        mock_collection.query.return_value = {
+            'distances': [[0.2]],
+            'documents': [['cleaned chunk']]
+        }
+        
+        with patch('src.chunk_processing.TextExtraction.lemmatization_and_punct_clean', return_value='cleaned') as mock_lem:
+            find_best_chunk(mock_collection, 'original request')
+            mock_lem.assert_called_once_with('original request')
+
+    def test_find_best_chunk_long_text(self):
+        mock_collection = Mock()
+        long_chunk = 'This is a very long chunk ' * 20
+        mock_collection.query.return_value = {
+            'distances': [[0.4]],
+            'documents': [[long_chunk]]
+        }
+        
+        with patch('src.chunk_processing.TextExtraction.lemmatization_and_punct_clean', return_value='long'):
+            chunk, distance = find_best_chunk(mock_collection, 'long query')
+        
+        assert chunk == long_chunk
+        assert distance == 0.4
