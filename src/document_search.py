@@ -60,5 +60,6 @@ class RelevantDocumentsSearch:
 main_folder_name = 'documents'  # название корневого каталога
 main_folder = Path.joinpath(Path(__file__).parent.parent, main_folder_name)  # полный путь до корневого каталога
 
-d = RelevantDocumentsSearch(main_folder, 'друг').find_documents()
-print(d)
+if __name__ == "__main__":
+    d = RelevantDocumentsSearch(main_folder, 'друг').find_documents()
+    print(d)
