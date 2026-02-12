@@ -2,8 +2,8 @@ from pathlib import Path
 import re
 import chromadb
 import os
-from text_extration import TextExtraction
-from chunk_processing import find_best_chunk, chunk_text_by_sentence
+from src.text_extration import TextExtraction
+from src.chunk_processing import find_best_chunk, chunk_text_by_sentence
 
 # import nltk
 # nltk.download('punkt_tab')
