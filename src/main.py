@@ -1,6 +1,7 @@
 import flet
 import os
-from ui.layout import create_main_layout
+from src.ui.layout import create_main_layout
+from src.document_search import RelevantDocumentsSearch
 
 def main(page: flet.Page):
     """Точка входа в приложение и управление состояниями.
@@ -35,24 +36,19 @@ def main(page: flet.Page):
         page.update()
 
     def get_database_results(query, folder_path):
-        """Заглушка для подключения базы данных.
-        Вставить вызов методов ChromaDB или поиск по файлам.
+        """Поиск по векторной базе данных и получение релевантных документов.
 
         query (str): поисковый запрос.
         folder_path (str): путь к папке для поиска.
         """
 
-
         if not folder_path:
             return []
+        
+        search_instance = RelevantDocumentsSearch(folder_path, query)
+        docs = search_instance.find_documents()
+        return [os.path.join(folder_path, doc) for doc in docs]
 
-        # Здесь логика: если в базе есть query, вернуть список путей
-        if "cat" in query.lower():
-            return [
-                os.path.join(folder_path, "cats.txt"),
-                os.path.join(folder_path, "catcaterpillar.pdf")
-            ]
-        return []
 
     def handle_folder_result(e: flet.FilePickerResultEvent):
         """Обработать результат выбора директории пользователем.
@@ -126,7 +122,6 @@ def main(page: flet.Page):
         loader.visible = True
         page.update()
 
-        # заглушка для получения данных от БД
         search_query = search_field.value
         db_results = get_database_results(search_query, current_directory)
 
