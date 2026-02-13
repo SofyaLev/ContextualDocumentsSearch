@@ -31,7 +31,7 @@ class TextExtraction:
 
     def get_paths(self, folder_path) -> None:
         """ Метод для поиска путей всех файлов """
-        for path in Path.iterdir(folder_path):
+        for path in Path.iterdir(Path(folder_path)):
             if Path.is_dir(path):
                 self.get_paths(path)
             else:
