@@ -2,8 +2,11 @@ from pathlib import Path
 import re
 import chromadb
 import os
-from src.text_extration import TextExtraction
-from src.chunk_processing import find_best_chunk, chunk_text_by_sentence
+
+from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+
+from text_extration import TextExtraction
+from chunk_processing import find_best_chunk, chunk_text_by_sentence
 
 # import nltk
 # nltk.download('punkt_tab')
@@ -20,11 +23,13 @@ class RelevantDocumentsSearch:
         self.chunk_length = chunk_length
         self.results_count = results_count
 
+        self.embedding_function = SentenceTransformerEmbeddingFunction('sergeyzh/LaBSE-ru-sts')
+
 
     def create_collection(self, text_chunks, relative_path):
         parts = re.split(r'[/\\]', str(relative_path))
         name_str = '.'.join(parts)
-        collection = self.client.get_or_create_collection(name=name_str)
+        collection = self.client.get_or_create_collection(name=name_str, embedding_function=self.embedding_function)
         text_chunks_lemmed = []
         for chunk in text_chunks:
             chunk = TextExtraction.lemmatization_and_punct_clean(chunk)
